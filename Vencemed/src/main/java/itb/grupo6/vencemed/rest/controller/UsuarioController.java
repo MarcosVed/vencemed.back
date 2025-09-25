@@ -1,4 +1,4 @@
-package itb.grupo6.vencemed.controller;
+package itb.grupo6.vencemed.rest.controller;
 
 import java.util.List;
 
