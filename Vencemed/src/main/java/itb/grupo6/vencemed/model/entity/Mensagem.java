@@ -1,4 +1,4 @@
-package itb.grup6.vencemed.model.entity;
+package itb.grupo6.vencemed.model.entity;
  
 import java.time.LocalDateTime;
 
@@ -25,15 +25,10 @@ public class Mensagem {
     private long id;
 
     private LocalDateTime dataMensagem;
-
     private String emissor;
-
     private String email;
-
     private String telefone;
-
     private String texto;
-
     private String statusMensagem; // ATIVO ou INATIVO
  
     // Getters and Setters

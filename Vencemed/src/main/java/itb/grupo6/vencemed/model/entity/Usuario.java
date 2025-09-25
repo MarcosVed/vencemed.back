@@ -1,4 +1,4 @@
-package itb.grup6.vencemed.model.entity;
+package itb.grupo6.vencemed.model.entity;
  
 import java.time.LocalDateTime;
 
@@ -25,17 +25,11 @@ public class Usuario {
     private long id;
 
     private String nome;
-
     private String email;
-
     private String senha;
-
     private String nivelAcesso; // ADMIN, FARMACIA, or USER
-
     private byte[] foto;
-
     private LocalDateTime dataCadastro;
-
     private String statusUsuario; // ATIVO, INATIVO, or TROCAR_SENHA
 
     // Getters and Setters

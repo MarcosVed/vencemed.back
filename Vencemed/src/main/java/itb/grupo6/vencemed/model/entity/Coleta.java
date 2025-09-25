@@ -1,4 +1,4 @@
-package itb.grup6.vencemed.model.entity;
+package itb.grupo6.vencemed.model.entity;
 
 import java.time.LocalDateTime;
 
