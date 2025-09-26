@@ -1,10 +1,10 @@
 package itb.grupo6.vencemed.service;
 
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import itb.grupo6.vencemed.model.entity.Usuario;
@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UsuarioService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
@@ -33,15 +34,13 @@ public class UsuarioService {
         Optional<Usuario> existente = usuarioRepository.findByEmail(usuario.getEmail());
 
         if (existente.isEmpty()) {
-            String senha = Base64.getEncoder().encodeToString(usuario.getSenha().getBytes());
-
-            usuario.setSenha(senha);
+            usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); // senha com hash seguro
             usuario.setDataCadastro(LocalDateTime.now());
             usuario.setStatusUsuario("ATIVO");
 
             return usuarioRepository.save(usuario);
         }
-        return null;
+        return null; // email já existe
     }
 
     @Transactional
@@ -56,15 +55,12 @@ public class UsuarioService {
 
     @Transactional
     public Usuario login(String email, String senha) {
-        Optional<Usuario> _usuario = usuarioRepository.findByEmail(email);
+        Optional<Usuario> _usuario = usuarioRepository.findByEmailAndStatusUsuario(email, "ATIVO");
 
         if (_usuario.isPresent()) {
             Usuario usuario = _usuario.get();
-            if ("ATIVO".equals(usuario.getStatusUsuario())) {
-                byte[] decodedPass = Base64.getDecoder().decode(usuario.getSenha());
-                if (new String(decodedPass).equals(senha)) {
-                    return usuario;
-                }
+            if (passwordEncoder.matches(senha, usuario.getSenha())) {
+                return usuario;
             }
         }
         return null;
@@ -76,9 +72,7 @@ public class UsuarioService {
 
         if (_usuario.isPresent()) {
             Usuario usuarioAtualizado = _usuario.get();
-            String senha = Base64.getEncoder().encodeToString(novaSenha.getBytes());
-
-            usuarioAtualizado.setSenha(senha);
+            usuarioAtualizado.setSenha(passwordEncoder.encode(novaSenha));
             usuarioAtualizado.setDataCadastro(LocalDateTime.now());
             usuarioAtualizado.setStatusUsuario("ATIVO");
 
@@ -93,9 +87,7 @@ public class UsuarioService {
 
         if (_usuario.isPresent()) {
             Usuario usuarioAtualizado = _usuario.get();
-            String senha = Base64.getEncoder().encodeToString("12345678".getBytes());
-
-            usuarioAtualizado.setSenha(senha);
+            usuarioAtualizado.setSenha(passwordEncoder.encode("12345678"));
             usuarioAtualizado.setDataCadastro(LocalDateTime.now());
             usuarioAtualizado.setStatusUsuario("INATIVO");
 
@@ -110,9 +102,7 @@ public class UsuarioService {
 
         if (_usuario.isPresent()) {
             Usuario usuarioAtualizado = _usuario.get();
-            String senha = Base64.getEncoder().encodeToString("12345678".getBytes());
-
-            usuarioAtualizado.setSenha(senha);
+            usuarioAtualizado.setSenha(passwordEncoder.encode("12345678"));
             usuarioAtualizado.setDataCadastro(LocalDateTime.now());
             usuarioAtualizado.setStatusUsuario("ATIVO");
 
