@@ -4,8 +4,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import itb.grupo6.vencemed.model.entity.Estabelecimento;
+import itb.grupo6.vencemed.model.entity.Usuario;
 import itb.grupo6.vencemed.service.EstabelecimentoService;
+import itb.grupo6.vencemed.service.UsuarioService;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -13,9 +16,11 @@ import java.util.Optional;
 public class EstabelecimentoController {
 
     private final EstabelecimentoService estabelecimentoService;
+    private final UsuarioService usuarioService;
 
-    public EstabelecimentoController(EstabelecimentoService estabelecimentoService) {
+    public EstabelecimentoController(EstabelecimentoService estabelecimentoService, UsuarioService usuarioService) {
         this.estabelecimentoService = estabelecimentoService;
+        this.usuarioService = usuarioService;
     }
 
     // Cadastro de estabelecimento (somente FARMÁCIA)
@@ -33,5 +38,27 @@ public class EstabelecimentoController {
         Optional<Estabelecimento> estab = estabelecimentoService.atualizar(usuarioId, estabId, novosDados);
         return estab.<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(403).body("Somente ADMIN pode atualizar estabelecimento."));
+    }
+
+    // Listagem de todos os estabelecimentos (somente ADMIN)
+    @GetMapping("/listar/{usuarioId}")
+    public ResponseEntity<?> listarTodos(@PathVariable Long usuarioId) {
+        Optional<Usuario> usuarioOpt = usuarioService.findByIdOptional(usuarioId);
+        if (usuarioOpt.isPresent() && "ADMIN".equalsIgnoreCase(usuarioOpt.get().getNivelAcesso())) {
+            List<Estabelecimento> estabelecimentos = estabelecimentoService.listarTodos();
+            return ResponseEntity.ok(estabelecimentos);
+        }
+        return ResponseEntity.status(403).body("Somente ADMIN pode listar todos os estabelecimentos.");
+    }
+
+    // Listagem dos estabelecimentos de um usuário (FARMÁCIA)
+    @GetMapping("/listarUsuario/{usuarioId}")
+    public ResponseEntity<?> listarPorUsuario(@PathVariable Long usuarioId) {
+        Optional<Usuario> usuarioOpt = usuarioService.findByIdOptional(usuarioId);
+        if (usuarioOpt.isPresent() && "FARMACIA".equalsIgnoreCase(usuarioOpt.get().getNivelAcesso())) {
+            List<Estabelecimento> estabelecimentos = estabelecimentoService.listarPorUsuario(usuarioOpt.get());
+            return ResponseEntity.ok(estabelecimentos);
+        }
+        return ResponseEntity.status(403).body("Somente FARMÁCIA pode listar seus estabelecimentos.");
     }
 }

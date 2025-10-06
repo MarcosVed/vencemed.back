@@ -1,6 +1,7 @@
 package itb.grupo6.vencemed.rest.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,13 +36,17 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping("/listar")
-    public ResponseEntity<List<Usuario>> listarUsuarios() {
-        List<Usuario> usuarios = usuarioService.findAll();
-        if (usuarios.isEmpty()) {
-            throw new ResourceNotFoundException("Nenhum usuário encontrado!");
+    @GetMapping("/listar/{adminId}")
+    public ResponseEntity<?> listarUsuarios(@PathVariable long adminId) {
+        Optional<Usuario> admin = usuarioService.findByIdOptional(adminId);
+        if (admin.isPresent() && "ADMIN".equalsIgnoreCase(admin.get().getNivelAcesso())) {
+            List<Usuario> usuarios = usuarioService.findAll();
+            if (usuarios.isEmpty()) {
+                throw new ResourceNotFoundException("Nenhum usuário encontrado!");
+            }
+            return ResponseEntity.ok(usuarios);
         }
-        return ResponseEntity.ok(usuarios);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Somente ADMIN pode listar usuários.");
     }
 
     @PostMapping("/salvar")
@@ -54,14 +59,18 @@ public class UsuarioController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
-        boolean deletado = usuarioService.delete(id);
-        if (deletado) {
-            return ResponseEntity.noContent().build();
-        } else {
-            throw new ResourceNotFoundException("Usuário não encontrado!");
+    @DeleteMapping("/delete/{adminId}/{id}")
+    public ResponseEntity<?> delete(@PathVariable long adminId, @PathVariable long id) {
+        Optional<Usuario> admin = usuarioService.findByIdOptional(adminId);
+        if (admin.isPresent() && "ADMIN".equalsIgnoreCase(admin.get().getNivelAcesso())) {
+            boolean deletado = usuarioService.delete(id);
+            if (deletado) {
+                return ResponseEntity.noContent().build();
+            } else {
+                throw new ResourceNotFoundException("Usuário não encontrado!");
+            }
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Somente ADMIN pode excluir usuários.");
     }
 
     @PostMapping("/login")
@@ -84,27 +93,49 @@ public class UsuarioController {
         }
     }
 
-    @PutMapping("/inativar/{id}")
-    public ResponseEntity<Usuario> inativar(@PathVariable long id) {
-        Usuario usuarioAtualizado = usuarioService.inativar(id);
-        if (usuarioAtualizado != null) {
-            return ResponseEntity.ok(usuarioAtualizado);
-        } else {
-            throw new ResourceNotFoundException("Usuário não encontrado!");
+    @PutMapping("/inativar/{adminId}/{id}")
+    public ResponseEntity<?> inativar(@PathVariable long adminId, @PathVariable long id) {
+        Optional<Usuario> admin = usuarioService.findByIdOptional(adminId);
+        if (admin.isPresent() && "ADMIN".equalsIgnoreCase(admin.get().getNivelAcesso())) {
+            Usuario usuarioAtualizado = usuarioService.inativar(id);
+            if (usuarioAtualizado != null) {
+                return ResponseEntity.ok(usuarioAtualizado);
+            } else {
+                throw new ResourceNotFoundException("Usuário não encontrado!");
+            }
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Somente ADMIN pode inativar usuários.");
     }
 
-    @PutMapping("/reativar/{id}")
-    public ResponseEntity<Usuario> reativar(@PathVariable long id) {
-        Usuario usuarioAtualizado = usuarioService.reativar(id);
-        if (usuarioAtualizado != null) {
-            return ResponseEntity.ok(usuarioAtualizado);
-        } else {
-            throw new ResourceNotFoundException("Usuário não encontrado!");
+    @PutMapping("/reativar/{adminId}/{id}")
+    public ResponseEntity<?> reativar(@PathVariable long adminId, @PathVariable long id) {
+        Optional<Usuario> admin = usuarioService.findByIdOptional(adminId);
+        if (admin.isPresent() && "ADMIN".equalsIgnoreCase(admin.get().getNivelAcesso())) {
+            Usuario usuarioAtualizado = usuarioService.reativar(id);
+            if (usuarioAtualizado != null) {
+                return ResponseEntity.ok(usuarioAtualizado);
+            } else {
+                throw new ResourceNotFoundException("Usuário não encontrado!");
+            }
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Somente ADMIN pode reativar usuários.");
+    }
+
+    @PutMapping("/alterarNivel/{adminId}/{usuarioId}")
+    public ResponseEntity<?> alterarNivel(
+            @PathVariable long adminId,
+            @PathVariable long usuarioId,
+            @RequestParam String novoNivel) {
+
+        Optional<Usuario> admin = usuarioService.findByIdOptional(adminId);
+        if (admin.isPresent() && "ADMIN".equalsIgnoreCase(admin.get().getNivelAcesso())) {
+            Usuario atualizado = usuarioService.alterarNivel(usuarioId, novoNivel);
+            if (atualizado != null) {
+                return ResponseEntity.ok(atualizado);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Somente ADMIN pode alterar nível de acesso.");
     }
 }
-
-
-
-

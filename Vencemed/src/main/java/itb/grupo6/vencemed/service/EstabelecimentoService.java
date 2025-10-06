@@ -1,6 +1,7 @@
 package itb.grupo6.vencemed.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -64,5 +65,15 @@ public class EstabelecimentoService {
             }
         }
         return Optional.empty();
+    }
+
+    // Listagem de todos os estabelecimentos (somente ADMIN)
+    public List<Estabelecimento> listarTodos() {
+        return estabelecimentoRepository.findAll();
+    }
+
+    // Listagem dos estabelecimentos de um usuário (FARMÁCIA)
+    public List<Estabelecimento> listarPorUsuario(Usuario usuario) {
+        return estabelecimentoRepository.findByUsuario(usuario);
     }
 }
