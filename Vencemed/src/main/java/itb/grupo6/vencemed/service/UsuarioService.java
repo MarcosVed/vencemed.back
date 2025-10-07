@@ -1,6 +1,7 @@
 package itb.grupo6.vencemed.service;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,18 +57,22 @@ public class UsuarioService {
         return false;
     }
 
-    @Transactional
-    public Usuario login(String email, String senha) {
-        Optional<Usuario> _usuario = usuarioRepository.findByEmailAndStatusUsuario(email, "ATIVO");
-        if (_usuario.isPresent()) {
-            Usuario usuario = _usuario.get();
-            if (senha.equals(usuario.getSenha())) {
-                return usuario;
-            }
-        }
-        return null;
-    }
+	@Transactional
+	public Optional<Usuario> login(String email, String senha) {
+		Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
 
+		if (usuario.isPresent()) {
+			if (!usuario.get().getStatusUsuario().equals("INATIVO")) {
+				byte[] decodedPass = Base64.getDecoder()
+												.decode(usuario.get().getSenha());
+				
+				if (new String(decodedPass).equals(senha)) {
+					return usuario;
+				}
+			}
+		}
+		return null;
+	}
     @Transactional
     public Usuario alterarSenha(long id, String novaSenha) {
         Optional<Usuario> _usuario = usuarioRepository.findById(id);
