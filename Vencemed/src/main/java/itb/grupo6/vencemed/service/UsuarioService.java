@@ -36,12 +36,17 @@ public class UsuarioService {
     public Usuario save(Usuario usuario) {
         Optional<Usuario> existente = usuarioRepository.findByEmail(usuario.getEmail());
         if (existente.isEmpty()) {
-            // salvar senha como está, sem hash
+            // Codificar a senha em Base64
+            String senhaCodificada = Base64.getEncoder().encodeToString(usuario.getSenha().getBytes());
+            usuario.setSenha(senhaCodificada);
+
             usuario.setDataCadastro(LocalDateTime.now());
             usuario.setStatusUsuario("ATIVO");
+
             if (usuario.getNivelAcesso() == null) {
                 usuario.setNivelAcesso("USER");
             }
+
             return usuarioRepository.save(usuario);
         }
         return null; // email já existe
@@ -57,30 +62,34 @@ public class UsuarioService {
         return false;
     }
 
-	@Transactional
-	public Optional<Usuario> login(String email, String senha) {
-		Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+    @Transactional
+    public Optional<Usuario> login(String email, String senha) {
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
 
-		if (usuario.isPresent()) {
-			if (!usuario.get().getStatusUsuario().equals("INATIVO")) {
-				byte[] decodedPass = Base64.getDecoder()
-												.decode(usuario.get().getSenha());
-				
-				if (new String(decodedPass).equals(senha)) {
-					return usuario;
-				}
-			}
-		}
-		return null;
-	}
+        if (usuario.isPresent()) {
+            if (!usuario.get().getStatusUsuario().equals("INATIVO")) {
+                byte[] decodedPass = Base64.getDecoder().decode(usuario.get().getSenha());
+                if (new String(decodedPass).equals(senha)) {
+                    return usuario;
+                }
+            }
+        }
+        return null;
+    }
+
     @Transactional
     public Usuario alterarSenha(long id, String novaSenha) {
         Optional<Usuario> _usuario = usuarioRepository.findById(id);
         if (_usuario.isPresent()) {
             Usuario usuarioAtualizado = _usuario.get();
-            usuarioAtualizado.setSenha(novaSenha);
+
+            // Codificar nova senha em Base64
+            String senhaCodificada = Base64.getEncoder().encodeToString(novaSenha.getBytes());
+            usuarioAtualizado.setSenha(senhaCodificada);
+
             usuarioAtualizado.setDataCadastro(LocalDateTime.now());
             usuarioAtualizado.setStatusUsuario("ATIVO");
+
             return usuarioRepository.save(usuarioAtualizado);
         }
         return null;
