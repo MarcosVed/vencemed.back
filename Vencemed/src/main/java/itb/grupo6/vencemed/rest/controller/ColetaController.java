@@ -11,6 +11,7 @@ import itb.grupo6.vencemed.service.ColetaService;
 
 @RestController
 @RequestMapping("/coletas")
+@CrossOrigin(origins = "*") // Permite acesso do Flutter
 public class ColetaController {
 
     @Autowired
@@ -35,6 +36,12 @@ public class ColetaController {
         return coletaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Listar coletas do usuário
+    @GetMapping("/minhas")
+    public ResponseEntity<List<Coleta>> listarMinhas(@RequestParam Long usuarioId) {
+        return ResponseEntity.ok(coletaService.listarPorUsuario(usuarioId));
     }
 
     // Atualizar coleta
