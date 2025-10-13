@@ -23,7 +23,7 @@ public class EstabelecimentoController {
         this.usuarioService = usuarioService;
     }
 
-    // Cadastro de estabelecimento (somente FARMÁCIA)
+    // FARMÁCIA pode cadastrar
     @PostMapping("/cadastrar/{usuarioId}")
     public ResponseEntity<?> cadastrar(@PathVariable Long usuarioId, @RequestBody Estabelecimento estabelecimento) {
         Optional<Estabelecimento> estab = estabelecimentoService.cadastrar(usuarioId, estabelecimento);
@@ -31,16 +31,23 @@ public class EstabelecimentoController {
                 .orElseGet(() -> ResponseEntity.status(403).body("Somente FARMÁCIA pode cadastrar estabelecimento."));
     }
 
-    // Atualização de estabelecimento (somente ADMIN)
+    // ADMIN e FARMÁCIA podem atualizar
     @PutMapping("/atualizar/{usuarioId}/{estabId}")
     public ResponseEntity<?> atualizar(@PathVariable Long usuarioId, @PathVariable Long estabId,
                                        @RequestBody Estabelecimento novosDados) {
-        Optional<Estabelecimento> estab = estabelecimentoService.atualizar(usuarioId, estabId, novosDados);
-        return estab.<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(403).body("Somente ADMIN pode atualizar estabelecimento."));
+        Optional<Usuario> usuarioOpt = usuarioService.findByIdOptional(usuarioId);
+        if (usuarioOpt.isPresent()) {
+            String nivel = usuarioOpt.get().getNivelAcesso();
+            if ("ADMIN".equalsIgnoreCase(nivel) || "FARMACIA".equalsIgnoreCase(nivel)) {
+                Optional<Estabelecimento> estab = estabelecimentoService.atualizar(usuarioId, estabId, novosDados);
+                return estab.<ResponseEntity<?>>map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.status(404).body("Estabelecimento não encontrado."));
+            }
+        }
+        return ResponseEntity.status(403).body("Somente ADMIN ou FARMÁCIA podem atualizar estabelecimento.");
     }
 
-    // Listagem de todos os estabelecimentos (somente ADMIN)
+    // ADMIN pode listar todos
     @GetMapping("/listar/{usuarioId}")
     public ResponseEntity<?> listarTodos(@PathVariable Long usuarioId) {
         Optional<Usuario> usuarioOpt = usuarioService.findByIdOptional(usuarioId);
@@ -51,7 +58,7 @@ public class EstabelecimentoController {
         return ResponseEntity.status(403).body("Somente ADMIN pode listar todos os estabelecimentos.");
     }
 
-    // Listagem dos estabelecimentos de um usuário (FARMÁCIA)
+    // FARMÁCIA pode listar seus próprios estabelecimentos
     @GetMapping("/listarUsuario/{usuarioId}")
     public ResponseEntity<?> listarPorUsuario(@PathVariable Long usuarioId) {
         Optional<Usuario> usuarioOpt = usuarioService.findByIdOptional(usuarioId);
@@ -60,5 +67,34 @@ public class EstabelecimentoController {
             return ResponseEntity.ok(estabelecimentos);
         }
         return ResponseEntity.status(403).body("Somente FARMÁCIA pode listar seus estabelecimentos.");
+    }
+
+    // Qualquer usuário pode listar por CEP
+    @GetMapping("/listarPorCep/{cep}")
+    public ResponseEntity<?> listarPorCep(@PathVariable String cep) {
+        List<Estabelecimento> estabelecimentos = estabelecimentoService.listarPorCep(cep);
+        return ResponseEntity.ok(estabelecimentos);
+    }
+
+    // Novo endpoint público para agendamento de coleta
+    @GetMapping("/publico")
+    public ResponseEntity<?> listarPublico() {
+        List<Estabelecimento> estabelecimentos = estabelecimentoService.listarTodos();
+        return ResponseEntity.ok(estabelecimentos);
+    }
+
+    // ADMIN pode excluir
+    @DeleteMapping("/excluir/{usuarioId}/{estabId}")
+    public ResponseEntity<?> excluir(@PathVariable Long usuarioId, @PathVariable Long estabId) {
+        Optional<Usuario> usuarioOpt = usuarioService.findByIdOptional(usuarioId);
+        if (usuarioOpt.isPresent() && "ADMIN".equalsIgnoreCase(usuarioOpt.get().getNivelAcesso())) {
+            boolean removido = estabelecimentoService.excluir(estabId);
+            if (removido) {
+                return ResponseEntity.ok("Estabelecimento excluído com sucesso.");
+            } else {
+                return ResponseEntity.status(404).body("Estabelecimento não encontrado.");
+            }
+        }
+        return ResponseEntity.status(403).body("Somente ADMIN pode excluir estabelecimento.");
     }
 }

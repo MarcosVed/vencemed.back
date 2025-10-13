@@ -21,4 +21,10 @@ public interface EstabelecimentoRepository extends JpaRepository<Estabelecimento
 
     // Verificar se já existe um estabelecimento vinculado a um usuário
     boolean existsByUsuario(Usuario usuario);
+
+    // Buscar estabelecimentos por CEP
+    List<Estabelecimento> findByCep(String cep);
+
+    // 🔍 Buscar estabelecimentos ativos que aceitam coleta
+    List<Estabelecimento> findByColetaTrueAndStatusEstabelecimento(String status);
 }

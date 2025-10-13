@@ -96,6 +96,16 @@ public class UsuarioController {
 		}
 	}
 
+	@PutMapping("/alterarNome/{id}")
+	public ResponseEntity<?> alterarNome(@PathVariable long id, @RequestParam String novoNome) {
+	    Usuario atualizado = usuarioService.alterarNome(id, novoNome);
+	    if (atualizado != null) {
+	        return ResponseEntity.ok(atualizado);
+	    } else {
+	        throw new ResourceNotFoundException("Usuário não encontrado!");
+	    }
+	}
+
 	@PutMapping("/inativar/{adminId}/{id}")
 	public ResponseEntity<?> inativar(@PathVariable long adminId, @PathVariable long id) {
 		Optional<Usuario> admin = usuarioService.findByIdOptional(adminId);

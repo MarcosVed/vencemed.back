@@ -94,6 +94,17 @@ public class UsuarioService {
         }
         return null;
     }
+    
+    @Transactional
+    public Usuario alterarNome(long id, String novoNome) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            usuario.setNome(novoNome);
+            return usuarioRepository.save(usuario);
+        }
+        return null;
+    }
 
     @Transactional
     public Usuario inativar(long id) {

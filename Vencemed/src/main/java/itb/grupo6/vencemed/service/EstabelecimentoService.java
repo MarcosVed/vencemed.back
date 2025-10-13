@@ -23,34 +23,28 @@ public class EstabelecimentoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // Cadastro de estabelecimento (apenas FARMÁCIA)
+    // FARMÁCIA pode cadastrar
     public Optional<Estabelecimento> cadastrar(Long usuarioId, Estabelecimento estabelecimento) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
 
-        if (usuarioOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
-
-            if ("FARMACIA".equalsIgnoreCase(usuario.getNivelAcesso())) {
-                estabelecimento.setUsuario(usuario);
-                estabelecimento.setDataCadastro(LocalDateTime.now());
-                estabelecimento.setStatusEstabelecimento("ATIVO");
-                return Optional.of(estabelecimentoRepository.save(estabelecimento));
-            }
+        if (usuarioOpt.isPresent() && "FARMACIA".equalsIgnoreCase(usuarioOpt.get().getNivelAcesso())) {
+            estabelecimento.setUsuario(usuarioOpt.get());
+            estabelecimento.setDataCadastro(LocalDateTime.now());
+            estabelecimento.setStatusEstabelecimento("ATIVO");
+            return Optional.of(estabelecimentoRepository.save(estabelecimento));
         }
         return Optional.empty();
     }
 
-    // Atualização de estabelecimento (apenas ADMIN)
+    // ADMIN e FARMÁCIA podem atualizar
     public Optional<Estabelecimento> atualizar(Long usuarioId, Long estabId, Estabelecimento novosDados) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
         Optional<Estabelecimento> estabOpt = estabelecimentoRepository.findById(estabId);
 
         if (usuarioOpt.isPresent() && estabOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
-
-            if ("ADMIN".equalsIgnoreCase(usuario.getNivelAcesso())) {
+            String nivel = usuarioOpt.get().getNivelAcesso();
+            if ("ADMIN".equalsIgnoreCase(nivel) || "FARMACIA".equalsIgnoreCase(nivel)) {
                 Estabelecimento estab = estabOpt.get();
-
                 estab.setNome(novosDados.getNome());
                 estab.setInfo(novosDados.getInfo());
                 estab.setCep(novosDados.getCep());
@@ -67,13 +61,28 @@ public class EstabelecimentoService {
         return Optional.empty();
     }
 
-    // Listagem de todos os estabelecimentos (somente ADMIN)
+    // ADMIN pode excluir
+    public boolean excluir(Long estabId) {
+        Optional<Estabelecimento> estabOpt = estabelecimentoRepository.findById(estabId);
+        if (estabOpt.isPresent()) {
+            estabelecimentoRepository.deleteById(estabId);
+            return true;
+        }
+        return false;
+    }
+
+    // Listagem geral
     public List<Estabelecimento> listarTodos() {
         return estabelecimentoRepository.findAll();
     }
 
-    // Listagem dos estabelecimentos de um usuário (FARMÁCIA)
+    // Listagem por usuário (FARMÁCIA)
     public List<Estabelecimento> listarPorUsuario(Usuario usuario) {
         return estabelecimentoRepository.findByUsuario(usuario);
+    }
+
+    // Listagem por CEP (público)
+    public List<Estabelecimento> listarPorCep(String cep) {
+        return estabelecimentoRepository.findByCep(cep);
     }
 }
