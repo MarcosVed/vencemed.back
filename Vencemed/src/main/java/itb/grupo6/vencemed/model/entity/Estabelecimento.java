@@ -1,5 +1,6 @@
 package itb.grupo6.vencemed.model.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
@@ -16,6 +17,8 @@ public class Estabelecimento {
     private String cep;
     private String numero;
     private String complemento;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private String telefone;
     private String tipo; // Ex: FARMACIA, POSTO, CLINICA...
     private String coleta; // RECEBER, RETIRAR, AMBOS
@@ -75,8 +78,24 @@ public class Estabelecimento {
     public void setComplemento(String complemento) {
         this.complemento = complemento;
     }
+    
+    public BigDecimal getLatitude() {
+		return latitude;
+	}
 
-    public String getTelefone() {
+	public void setLatitude(BigDecimal latitude) {
+		this.latitude = latitude;
+	}
+
+	public BigDecimal getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(BigDecimal longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getTelefone() {
         return telefone;
     }
 
