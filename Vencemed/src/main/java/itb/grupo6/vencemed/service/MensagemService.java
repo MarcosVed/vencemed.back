@@ -97,6 +97,15 @@ public class MensagemService {
 		return null;
 	}
 	
-	
+	@Transactional
+	public boolean delete(long id) {
+	    Optional<Mensagem> mensagem = mensagemRepository.findById(id);
+	    if (mensagem.isPresent()) {
+	        mensagemRepository.deleteById(id);
+	        return true;
+	    }
+	    return false;
+	}
+
 	
 }
