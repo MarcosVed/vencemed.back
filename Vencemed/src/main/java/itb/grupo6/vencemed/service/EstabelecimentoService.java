@@ -82,6 +82,7 @@ public class EstabelecimentoService {
                 estab.setTipo(novosDados.getTipo());
                 estab.setColeta(novosDados.getColeta());
                 estab.setStatusEstabelecimento(novosDados.getStatusEstabelecimento());
+                estab.setFotoEst(novosDados.getFotoEst()); // inclusão do campo binário
 
                 return Optional.of(estabelecimentoRepository.save(estab));
             }

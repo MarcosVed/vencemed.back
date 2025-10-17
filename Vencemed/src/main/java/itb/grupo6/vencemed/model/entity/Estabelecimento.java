@@ -13,19 +13,45 @@ public class Estabelecimento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 100)
     private String nome;
+
+    @Column(length = 255)
     private String info;
+
+    @Column(length = 9, nullable = false)
     private String cep;
+
+    @Column(length = 10, nullable = false)
     private String numero;
+
+    @Column(length = 40, nullable = false)
     private String complemento;
+
     private BigDecimal latitude;
+
     private BigDecimal longitude;
+
+    @Column(length = 20, nullable = false)
     private String telefone;
+
+    @Column(length = 20, nullable = false)
     private String tipo; // Ex: FARMACIA, POSTO, CLINICA...
+
+    @Column(length = 30, nullable = false)
     private String coleta; // RECEBER, RETIRAR, AMBOS
+
     private LocalDateTime dataCadastro;
-    private String statusEstabelecimento; // ATIVO, INATIVO
+
+    @Column(length = 20, nullable = false)
+    private String statusEstabelecimento; // ATIVO, PENDENTE, INATIVO
+
+    @Column(length = 20, nullable = false)
     private String cnpj;
+
+    @Lob
+    @Column(name = "fotoest")
+    private byte[] fotoEst;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -143,6 +169,14 @@ public class Estabelecimento {
 
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
+    }
+
+    public byte[] getFotoEst() {
+        return fotoEst;
+    }
+
+    public void setFotoEst(byte[] fotoEst) {
+        this.fotoEst = fotoEst;
     }
 
     public Usuario getUsuario() {
