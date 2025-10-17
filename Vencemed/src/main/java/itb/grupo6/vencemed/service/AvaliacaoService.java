@@ -41,4 +41,16 @@ public class AvaliacaoService {
     public List<Avaliacao> listarPorUsuario(Usuario usuario) {
         return avaliacaoRepository.findByUsuario(usuario);
     }
+    
+    public Avaliacao atualizarAvaliacao(Long id, int nota, String comentario) {
+        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Avaliação não encontrada."));
+
+        avaliacao.setNota(nota);
+        avaliacao.setComentario(comentario);
+        avaliacao.setDataAvaliacao(LocalDateTime.now());
+
+        return avaliacaoRepository.save(avaliacao);
+    }
+
 }
