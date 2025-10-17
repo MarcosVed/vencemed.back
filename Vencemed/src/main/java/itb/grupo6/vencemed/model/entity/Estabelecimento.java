@@ -2,6 +2,7 @@ package itb.grupo6.vencemed.model.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -24,8 +25,9 @@ public class Estabelecimento {
     private String coleta; // RECEBER, RETIRAR, AMBOS
     private LocalDateTime dataCadastro;
     private String statusEstabelecimento; // ATIVO, INATIVO
+    private String cnpj;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
@@ -78,24 +80,24 @@ public class Estabelecimento {
     public void setComplemento(String complemento) {
         this.complemento = complemento;
     }
-    
+
     public BigDecimal getLatitude() {
-		return latitude;
-	}
+        return latitude;
+    }
 
-	public void setLatitude(BigDecimal latitude) {
-		this.latitude = latitude;
-	}
+    public void setLatitude(BigDecimal latitude) {
+        this.latitude = latitude;
+    }
 
-	public BigDecimal getLongitude() {
-		return longitude;
-	}
+    public BigDecimal getLongitude() {
+        return longitude;
+    }
 
-	public void setLongitude(BigDecimal longitude) {
-		this.longitude = longitude;
-	}
+    public void setLongitude(BigDecimal longitude) {
+        this.longitude = longitude;
+    }
 
-	public String getTelefone() {
+    public String getTelefone() {
         return telefone;
     }
 
@@ -133,6 +135,14 @@ public class Estabelecimento {
 
     public void setStatusEstabelecimento(String statusEstabelecimento) {
         this.statusEstabelecimento = statusEstabelecimento;
+    }
+
+    public String getCnpj() {
+        return cnpj;
+    }
+
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
     }
 
     public Usuario getUsuario() {

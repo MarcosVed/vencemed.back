@@ -17,7 +17,7 @@ public class ColetaService {
 
     // Criar / agendar coleta
     public Coleta agendarColeta(Coleta coleta) {
-        coleta.setStatusColeta("ATIVO");
+        coleta.setStatusColeta("ATIVO"); // ao agendar, já começa como ATIVO
         return coletaRepository.save(coleta);
     }
 
@@ -34,6 +34,11 @@ public class ColetaService {
     // Buscar coletas por usuário
     public List<Coleta> listarPorUsuario(Long usuarioId) {
         return coletaRepository.findByUsuarioId(usuarioId);
+    }
+
+    // Buscar coletas por estabelecimento
+    public List<Coleta> listarPorEstabelecimento(Long estabelecimentoId) {
+        return coletaRepository.findByEstabelecimentoId(estabelecimentoId);
     }
 
     // Atualizar coleta

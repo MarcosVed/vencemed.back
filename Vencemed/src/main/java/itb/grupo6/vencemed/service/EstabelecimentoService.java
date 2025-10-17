@@ -3,6 +3,7 @@ package itb.grupo6.vencemed.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
@@ -23,28 +24,55 @@ public class EstabelecimentoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // FARMÁCIA pode cadastrar
-    public Optional<Estabelecimento> cadastrar(Long usuarioId, Estabelecimento estabelecimento) {
+    // Solicitação de cadastro por USER
+    public Optional<Estabelecimento> solicitarCadastro(Long usuarioId, Estabelecimento estabelecimento) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
 
-        if (usuarioOpt.isPresent() && "FARMACIA".equalsIgnoreCase(usuarioOpt.get().getNivelAcesso())) {
+        if (usuarioOpt.isPresent() && "USER".equalsIgnoreCase(usuarioOpt.get().getNivelAcesso())) {
             estabelecimento.setUsuario(usuarioOpt.get());
             estabelecimento.setDataCadastro(LocalDateTime.now());
-            estabelecimento.setStatusEstabelecimento("ATIVO");
+            estabelecimento.setStatusEstabelecimento("PENDENTE");
             return Optional.of(estabelecimentoRepository.save(estabelecimento));
         }
         return Optional.empty();
     }
 
-    // ADMIN e FARMÁCIA podem atualizar
+    // ADMIN revisa solicitação e aprova ou rejeita
+    public Optional<Estabelecimento> revisarSolicitacao(Long adminId, Long estabId, boolean aprovar) {
+        Optional<Usuario> adminOpt = usuarioRepository.findById(adminId);
+        Optional<Estabelecimento> estabOpt = estabelecimentoRepository.findById(estabId);
+
+        if (adminOpt.isPresent() && "ADMIN".equalsIgnoreCase(adminOpt.get().getNivelAcesso()) && estabOpt.isPresent()) {
+            Estabelecimento estab = estabOpt.get();
+            Usuario usuario = estab.getUsuario();
+
+            if (aprovar) {
+                estab.setStatusEstabelecimento("ATIVO");
+                usuario.setNivelAcesso("FARMACIA");
+                usuarioRepository.save(usuario);
+            } else {
+                estab.setStatusEstabelecimento("INATIVO");
+            }
+
+            return Optional.of(estabelecimentoRepository.save(estab));
+        }
+        return Optional.empty();
+    }
+
+    // FARMÁCIA pode alterar seu próprio estabelecimento
     public Optional<Estabelecimento> atualizar(Long usuarioId, Long estabId, Estabelecimento novosDados) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
         Optional<Estabelecimento> estabOpt = estabelecimentoRepository.findById(estabId);
 
         if (usuarioOpt.isPresent() && estabOpt.isPresent()) {
-            String nivel = usuarioOpt.get().getNivelAcesso();
-            if ("ADMIN".equalsIgnoreCase(nivel) || "FARMACIA".equalsIgnoreCase(nivel)) {
-                Estabelecimento estab = estabOpt.get();
+            Usuario usuario = usuarioOpt.get();
+            Estabelecimento estab = estabOpt.get();
+
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(usuario.getNivelAcesso());
+            boolean isFarmaciaDona = "FARMACIA".equalsIgnoreCase(usuario.getNivelAcesso()) &&
+                                      Objects.equals(estab.getUsuario().getId(), usuarioId);
+
+            if (isAdmin || isFarmaciaDona) {
                 estab.setNome(novosDados.getNome());
                 estab.setInfo(novosDados.getInfo());
                 estab.setCep(novosDados.getCep());
@@ -61,19 +89,47 @@ public class EstabelecimentoService {
         return Optional.empty();
     }
 
-    // ADMIN pode excluir
-    public boolean excluir(Long estabId) {
+    // FARMÁCIA pode excluir seu próprio estabelecimento
+    public boolean excluir(Long usuarioId, Long estabId) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
         Optional<Estabelecimento> estabOpt = estabelecimentoRepository.findById(estabId);
-        if (estabOpt.isPresent()) {
-            estabelecimentoRepository.deleteById(estabId);
-            return true;
+
+        if (usuarioOpt.isPresent() && estabOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            Estabelecimento estab = estabOpt.get();
+
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(usuario.getNivelAcesso());
+            boolean isFarmaciaDona = "FARMACIA".equalsIgnoreCase(usuario.getNivelAcesso()) &&
+                                      Objects.equals(estab.getUsuario().getId(), usuarioId);
+
+            if (isAdmin || isFarmaciaDona) {
+                estabelecimentoRepository.deleteById(estabId);
+                return true;
+            }
         }
         return false;
     }
+ 
+    // FARMÁCIA pode cadastrar diretamente
+    public Optional<Estabelecimento> cadastrar(Long usuarioId, Estabelecimento estabelecimento) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
 
-    // Listagem geral
+        if (usuarioOpt.isPresent() && "FARMACIA".equalsIgnoreCase(usuarioOpt.get().getNivelAcesso())) {
+            estabelecimento.setUsuario(usuarioOpt.get());
+            estabelecimento.setDataCadastro(LocalDateTime.now());
+            estabelecimento.setStatusEstabelecimento("ATIVO");
+            return Optional.of(estabelecimentoRepository.save(estabelecimento));
+        }
+        return Optional.empty();
+    }
+    // Listagem geral (ADMIN)
     public List<Estabelecimento> listarTodos() {
         return estabelecimentoRepository.findAll();
+    }
+
+    // Listagem de solicitações pendentes (ADMIN)
+    public List<Estabelecimento> listarPendentes() {
+        return estabelecimentoRepository.findByStatusEstabelecimento("PENDENTE");
     }
 
     // Listagem por usuário (FARMÁCIA)

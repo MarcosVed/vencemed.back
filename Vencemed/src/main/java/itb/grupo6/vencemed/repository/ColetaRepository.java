@@ -9,7 +9,10 @@ import itb.grupo6.vencemed.model.entity.Coleta;
 
 @Repository
 public interface ColetaRepository extends JpaRepository<Coleta, Long> {
-    
+
     // Busca todas as coletas associadas a um usuário específico
     List<Coleta> findByUsuarioId(Long usuarioId);
+
+    // Busca todas as coletas associadas a um estabelecimento específico
+    List<Coleta> findByEstabelecimentoId(Long estabelecimentoId);
 }

@@ -38,6 +38,13 @@ public class ColetaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Listar coletas por estabelecimento
+    @GetMapping("/estabelecimento/{estabelecimentoId}")
+    public ResponseEntity<List<Coleta>> listarPorEstabelecimento(@PathVariable Long estabelecimentoId) {
+        List<Coleta> coletas = coletaService.listarPorEstabelecimento(estabelecimentoId);
+        return ResponseEntity.ok(coletas);
+    }
+
     // Listar coletas do usuário
     @GetMapping("/minhas")
     public ResponseEntity<List<Coleta>> listarMinhas(@RequestParam Long usuarioId) {
