@@ -25,7 +25,7 @@ public class Estabelecimento {
     @Column(length = 10, nullable = false)
     private String numero;
 
-    @Column(length = 40, nullable = false)
+    @Column(length = 40)
     private String complemento;
 
     private BigDecimal latitude;
@@ -36,15 +36,15 @@ public class Estabelecimento {
     private String telefone;
 
     @Column(length = 20, nullable = false)
-    private String tipo; // Ex: FARMACIA, POSTO, CLINICA...
+    private String tipo;
 
     @Column(length = 30, nullable = false)
-    private String coleta; // RECEBER, RETIRAR, AMBOS
+    private String coleta;
 
     private LocalDateTime dataCadastro;
 
     @Column(length = 20, nullable = false)
-    private String statusEstabelecimento; // ATIVO, PENDENTE, INATIVO
+    private String statusEstabelecimento;
 
     @Column(length = 20, nullable = false)
     private String cnpj;
@@ -52,6 +52,9 @@ public class Estabelecimento {
     @Lob
     @Column(name = "fotoest")
     private byte[] fotoEst;
+
+    @Column(length = 100)
+    private String endereço;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -177,6 +180,14 @@ public class Estabelecimento {
 
     public void setFotoEst(byte[] fotoEst) {
         this.fotoEst = fotoEst;
+    }
+
+    public String getEndereço() {
+        return endereço;
+    }
+
+    public void setEndereço(String endereço) {
+        this.endereço = endereço;
     }
 
     public Usuario getUsuario() {

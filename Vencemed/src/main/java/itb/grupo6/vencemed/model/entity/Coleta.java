@@ -12,13 +12,28 @@ public class Coleta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 200, nullable = false)
     private String info;
+
+    @Column(length = 9, nullable = false)
     private String cep;
+
+    @Column(length = 10, nullable = false)
     private String numero;
+
+    @Column(length = 40)
     private String complemento;
+
+    @Column(length = 20, nullable = false)
     private String telefone;
-    private String tipoMedicamento; // VARIOS, SERINGA, COMPRIMIDO...
-    private String tipoColeta;      // RETIRADA ou ENTREGA
+
+    @Column(length = 20, nullable = false)
+    private String tipoMedicamento;
+
+    @Column(length = 30, nullable = false)
+    private String tipoColeta;
+
+    @Column(nullable = false)
     private LocalDateTime dataColeta;
 
     @ManyToOne
@@ -29,7 +44,11 @@ public class Coleta {
     @JoinColumn(name = "estabelecimento_id", nullable = false)
     private Estabelecimento estabelecimento;
 
-    private String statusColeta; // ATIVO, COLETADO, INATIVO
+    @Column(length = 10, nullable = false)
+    private String statusColeta;
+
+    @Column(length = 100, nullable = false)
+    private String endereço;
 
     // Getters and Setters
 
@@ -127,5 +146,13 @@ public class Coleta {
 
     public void setStatusColeta(String statusColeta) {
         this.statusColeta = statusColeta;
+    }
+
+    public String getEndereço() {
+        return endereço;
+    }
+
+    public void setEndereço(String endereço) {
+        this.endereço = endereço;
     }
 }
