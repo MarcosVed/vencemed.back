@@ -1,11 +1,13 @@
 package itb.grupo6.vencemed.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import itb.grupo6.vencemed.model.entity.Estabelecimento;
 import itb.grupo6.vencemed.model.entity.Usuario;
@@ -141,5 +143,19 @@ public class EstabelecimentoService {
     // Listagem por CEP (público)
     public List<Estabelecimento> listarPorCep(String cep) {
         return estabelecimentoRepository.findByCep(cep);
+    }
+    public Estabelecimento atualizarImagem(Long id, MultipartFile imagem) throws IOException {
+        Optional<Estabelecimento> optional = estabelecimentoRepository.findById(id);
+        if (optional.isPresent()) {
+            Estabelecimento est = optional.get();
+            est.setFotoEst(imagem.getBytes()); // Campo byte[] no modelo
+            return estabelecimentoRepository.save(est);
+        } else {
+            throw new RuntimeException("Estabelecimento não encontrado com ID: " + id);
+        }
+    }
+
+    public Optional<Estabelecimento> findById(Long id) {
+        return estabelecimentoRepository.findById(id);
     }
 }

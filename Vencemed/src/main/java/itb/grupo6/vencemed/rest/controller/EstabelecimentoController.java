@@ -113,5 +113,18 @@ public class EstabelecimentoController {
     public ResponseEntity<?> listarPublico() {
         List<Estabelecimento> estabelecimentos = estabelecimentoService.listarTodos();
         return ResponseEntity.ok(estabelecimentos);
+   }
+
+    @GetMapping("/imagem/{id}")
+    public ResponseEntity<byte[]> getImagem(@PathVariable Long id) {
+        Optional<Estabelecimento> estabelecimento = estabelecimentoService.findById(id);
+
+        if (estabelecimento.isPresent() && estabelecimento.get().getFotoEst() != null) {
+            return ResponseEntity.ok()
+                    .header("Content-Type", "image/jpeg")
+                    .body(estabelecimento.get().getFotoEst());
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }
